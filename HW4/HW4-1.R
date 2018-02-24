@@ -5,7 +5,14 @@ rawData <- read.table("employment_data2.txt", TRUE, "\t")
 countries <- rawData$Country
 row.names(rawData) <- countries
 
-hclustresult <- hclust(dist(rawData), method = "average")
-plot(as.phylo(hclustresult), type='fan', show.node.label = TRUE, font = 2, cex= 0.45)
-#axis(1, at=1:26, labels=countries)
-#plot(hc)
+hclustresult1 <- hclust(dist(rawData), method = "single")
+plot(as.phylo(hclustresult1), type='fan', show.node.label = TRUE, font = 2, cex= 0.45)
+
+hclustresult2 <- hclust(dist(rawData), method = "average")
+plot(as.phylo(hclustresult2), type='fan', show.node.label = TRUE, font = 2, cex= 0.45)
+
+hclustresult3 <- hclust(dist(rawData), method = "average")
+plot(as.phylo(hclustresult3), type='fan', show.node.label = TRUE, font = 2, cex= 0.45)
+
+
+
