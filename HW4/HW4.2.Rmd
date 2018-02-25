@@ -46,7 +46,7 @@ class_list <- list(c(brush_teeth,climb_stairs,comb_hair,descend_stairs,drink_gla
 
 #print(length(class_list[[1]]))
 trainSize <- floor(0.8*length(class_list[[1]]))
-
+set.seed(123)
 trainData <- sample(as.vector(class_list[[1]]), size = trainSize)
 testData <- setdiff(class_list[[1]], trainData)
 
@@ -55,15 +55,21 @@ testData <- setdiff(class_list[[1]], trainData)
 
 #print(typeof(trainData))
 
-cuttedData <- list()
+cuttedData <- numeric()
 for(i in 1:length(trainData))
 {
   dataPoint <- trainData[[i]]
-  cuttedData[[i]] <- dataPoint[1:50,]
+  xyzData <- t(dataPoint[1:50,])
+  temp <- xyzData[1,]
+  temp <- c(temp, xyzData[2,])
+  temp <- c(temp, xyzData[3,])
+  cuttedData <- c(cuttedData, temp)
 }
 #print(length(cuttedData))
-#print(cuttedData[[1]])
-#print(dim(cuttedData[[1]]))
+#print(cuttedData[1:150])
+
+
+
 
 
 
