@@ -55,40 +55,45 @@ testData <- setdiff(class_list[[1]], trainData)
 
 #print(typeof(trainData))
 
-cuttedData <- numeric()
-for(i in 1:length(trainData))
-{
-  start <- 1
-  end <- 50
-  chunkSize <- floor( nrow(trainData[[i]]) / 50 )
-  print(chunkSize)
-  dataPoint <- trainData[[i]]
-  
-  for(j in 1:chunkSize)
+cutSize <- 50
+cutData <- function(trainData){
+  cuttedData <- numeric()
+  for(i in 1:length(trainData))
   {
-    xyzData <- t(dataPoint[start:end,])
-    temp <- xyzData[1,]
-    temp <- c(temp, xyzData[2,])
-    temp <- c(temp, xyzData[3,])
-    cuttedData <- c(cuttedData, temp)
-    start <- start + 50
-    end <- end + 50
-  }
-  
-  if(end > nrow(dataPoint))
-  {
-    end <- nrow(dataPoint)
-    start <- end - 50
+    start <- 1
+    end <- cutSize
+    chunkSize <- floor( nrow(trainData[[i]]) / cutSize )
+#    print(chunkSize)
+    dataPoint <- trainData[[i]]
     
-    xyzData <- t(dataPoint[start:end,])
-    temp <- xyzData[1,]
-    temp <- c(temp, xyzData[2,])
-    temp <- c(temp, xyzData[3,])
-    cuttedData <- c(cuttedData, temp)
+    for(j in 1:chunkSize)
+    {
+      xyzData <- t(dataPoint[start:end,])
+      temp <- xyzData[1,]
+      temp <- c(temp, xyzData[2,])
+      temp <- c(temp, xyzData[3,])
+      cuttedData <- c(cuttedData, temp)
+      start <- start + cutSize
+      end <- end + cutSize
+    }
+    
+    if(end > nrow(dataPoint))
+    {
+      end <- nrow(dataPoint)
+      start <- end - cutSize
+      
+      xyzData <- t(dataPoint[start:end,])
+      temp <- xyzData[1,]
+      temp <- c(temp, xyzData[2,])
+      temp <- c(temp, xyzData[3,])
+      cuttedData <- c(cuttedData, temp)
+    }
   }
+  cuttedData <- matrix(cuttedData, ncol = 150, byrow = TRUE)
+  return (cuttedData)
 }
 
-cuttedData <- matrix(cuttedData, ncol = 150, byrow = TRUE)
+cuttedTrainData <- cutData(trainData)
 #print(cuttedData)
 #print(length(cuttedData))
 #print(cuttedData[1:150])
@@ -103,7 +108,11 @@ cuttedData <- matrix(cuttedData, ncol = 150, byrow = TRUE)
 
 ```{r}
 kmeans_14 = kmeans(cuttedData,centers = 14)
-print(kmeans_14)
+#print(kmeans_14)
+
+cuttedTestData <- cutData(testData)
+print(typeof(cuttedTestData[1,1]))
+print(cuttedTestData)
 #print(dim(kmeans_40$centers))
 #fitted(kmeans_40,method=c("centers", "classes"))
 ```
