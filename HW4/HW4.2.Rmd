@@ -1,0 +1,48 @@
+---
+title: "HW4"
+output: word_document
+---
+
+```{r}
+filelist_1 = list.files('HMP_Dataset/Brush_teeth/',pattern = '*.txt')
+filelist_2 = list.files('HMP_Dataset/Climb_stairs/',pattern = '*.txt')
+filelist_3 = list.files('HMP_Dataset/Comb_hair/',pattern = '*.txt')
+filelist_4 = list.files('HMP_Dataset/Descend_stairs/',pattern = '*.txt')
+filelist_5 = list.files('HMP_Dataset/Drink_glass/',pattern = '*.txt')
+filelist_6 = list.files('HMP_Dataset/Eat_meat/',pattern = '*.txt')
+filelist_7 = list.files('HMP_Dataset/Eat_soup/',pattern = '*.txt')
+filelist_8 = list.files('HMP_Dataset/Getup_bed/',pattern = '*.txt')
+filelist_9 = list.files('HMP_Dataset/Liedown_bed/',pattern = '*.txt')
+filelist_10 = list.files('HMP_Dataset/Pour_water/',pattern = '*.txt')
+filelist_11 = list.files('HMP_Dataset/Sitdown_chair/',pattern = '*.txt')
+filelist_12 = list.files('HMP_Dataset/Standup_chair/',pattern = '*.txt')
+filelist_13 = list.files('HMP_Dataset/Use_telephone/',pattern = '*.txt')
+filelist_14 = list.files('HMP_Dataset/Walk/',pattern = '*.txt')
+
+brush_teeth = lapply(paste('HMP_Dataset/Brush_teeth/',filelist_1,sep = '/'), function(x) read.table(x, header=FALSE))
+climb_stairs = lapply(paste('HMP_Dataset/Climb_stairs/',filelist_2,sep = '/'), function(x) read.table(x, header=FALSE))
+comb_hair = lapply(paste('HMP_Dataset/Comb_hair/',filelist_3,sep = '/'), function(x) read.table(x, header=FALSE)) 
+descend_stairs = lapply(paste('HMP_Dataset/Descend_stairs/',filelist_4,sep = '/'), function(x) read.table(x, header=FALSE)) 
+drink_glass = lapply(paste('HMP_Dataset/Drink_glass/',filelist_5,sep = '/'), function(x) read.table(x, header=FALSE)) 
+eat_meat = lapply(paste('HMP_Dataset/Eat_meat/',filelist_6,sep = '/'), function(x) read.table(x, header=FALSE)) 
+eat_soup = lapply(paste('HMP_Dataset/Eat_soup/',filelist_7,sep = '/'), function(x) read.table(x, header=FALSE)) 
+getup_bed = lapply(paste('HMP_Dataset/Getup_bed/',filelist_8,sep = '/'), function(x) read.table(x, header=FALSE)) 
+liedown_bed = lapply(paste('HMP_Dataset/Liedown_bed/',filelist_9,sep = '/'), function(x) read.table(x, header=FALSE)) 
+pour_water = lapply(paste('HMP_Dataset/Pour_water/',filelist_10,sep = '/'), function(x) read.table(x, header=FALSE)) 
+sitdown_chair = lapply(paste('HMP_Dataset/Sitdown_chair/',filelist_11,sep = '/'), function(x) read.table(x, header=FALSE)) 
+standup_chair = lapply(paste('HMP_Dataset/Standup_chair/',filelist_12,sep = '/'), function(x) read.table(x, header=FALSE)) 
+use_telephone = lapply(paste('HMP_Dataset/Use_telephone/',filelist_13,sep = '/'), function(x) read.table(x, header=FALSE)) 
+walk = lapply(paste('HMP_Dataset/Walk/',filelist_14,sep = '/'), function(x) read.table(x, header=FALSE)) 
+remove(filelist_1,filelist_2,filelist_3,filelist_4,filelist_5,filelist_6,filelist_7,filelist_8,filelist_9,filelist_10,filelist_11,filelist_12,filelist_13,filelist_14)
+```
+
+```{r}
+original_data = c(brush_teeth,climb_stairs,comb_hair,descend_stairs,drink_glass,eat_meat,eat_soup,getup_bed,liedown_bed,pour_water,sitdown_chair,standup_chair,use_telephone,walk)
+```
+
+```{r}
+allData <- list()
+class_list <- list(c(brush_teeth,climb_stairs,comb_hair,descend_stairs,drink_glass,eat_meat,eat_soup,getup_bed,liedown_bed,pour_water,sitdown_chair,standup_chair,use_telephone,walk))
+
+```
+
