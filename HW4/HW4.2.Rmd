@@ -2,6 +2,9 @@
 title: "HW4"
 output: word_document
 ---
+```{r}
+library(randomForest)
+```
 
 ```{r}
 filelist_1 = list.files('HMP_Dataset/Brush_teeth/',pattern = '*.txt')
@@ -37,23 +40,79 @@ remove(filelist_1,filelist_2,filelist_3,filelist_4,filelist_5,filelist_6,filelis
 ```
 
 ```{r}
-original_data = c(brush_teeth,climb_stairs,comb_hair,descend_stairs,drink_glass,eat_meat,eat_soup,getup_bed,liedown_bed,pour_water,sitdown_chair,standup_chair,use_telephone,walk)
+for(i in 1:length(brush_teeth)){
+  brush_teeth[[i]]$label = 1
+}
+
+for(i in 1:length(climb_stairs)){
+    climb_stairs[[i]]$label = 2
+}
+
+for(i in 1:length(comb_hair)){
+    comb_hair[[i]]$label = 3
+}
+
+for(i in 1:length(descend_stairs)){
+    descend_stairs[[i]]$label = 4
+}
+
+for(i in 1:length(drink_glass)){
+    drink_glass[[i]]$label = 5
+}
+
+for(i in 1:length(eat_meat)){
+    eat_meat[[i]]$label = 6
+}
+
+for(i in 1:length(eat_soup)){
+    eat_soup[[i]]$label = 7
+}
+
+for(i in 1:length(getup_bed)){
+    getup_bed[[i]]$label = 8
+}
+
+for(i in 1:length(liedown_bed)){
+    liedown_bed[[i]]$label = 9
+}
+
+for(i in 1:length(pour_water)){
+    pour_water[[i]]$label = 10
+}
+
+for(i in 1:length(sitdown_chair)){
+    sitdown_chair[[i]]$label = 11
+}
+
+for(i in 1:length(standup_chair)){
+    standup_chair[[i]]$label = 12
+}
+
+for(i in 1:length(use_telephone)){
+    use_telephone[[i]]$label = 13
+}
+
+for(i in 1:length(walk)){
+    walk[[i]]$label = 14
+}
+print(brush_teeth[[1]])
+print(walk[[1]])
 ```
 
 ```{r}
+head(nrow(brush_teeth[[1]]))
+```
+
+
+```{r}
 #allData <- list()
+
 class_list <- list(c(brush_teeth,climb_stairs,comb_hair,descend_stairs,drink_glass,eat_meat,eat_soup,getup_bed,liedown_bed,pour_water,sitdown_chair,standup_chair,use_telephone,walk))
 
-#print(length(class_list[[1]]))
 trainSize <- floor(0.8*length(class_list[[1]]))
 set.seed(123)
 trainData <- sample(as.vector(class_list[[1]]), size = trainSize)
 testData <- setdiff(class_list[[1]], trainData)
-
-#print(length(trainData))
-#print(length(testData))
-
-#print(typeof(trainData))
 
 cutSize <- 50
 cutData <- function(trainData){
@@ -63,7 +122,7 @@ cutData <- function(trainData){
     start <- 1
     end <- cutSize
     chunkSize <- floor( nrow(trainData[[i]]) / cutSize )
-#    print(chunkSize)
+    #print(chunkSize)
     dataPoint <- trainData[[i]]
     
     for(j in 1:chunkSize)
@@ -76,7 +135,6 @@ cutData <- function(trainData){
       start <- start + cutSize
       end <- end + cutSize
     }
-    
     if(end > nrow(dataPoint))
     {
       end <- nrow(dataPoint)
@@ -92,28 +150,23 @@ cutData <- function(trainData){
   cuttedData <- matrix(cuttedData, ncol = 150, byrow = TRUE)
   return (cuttedData)
 }
-
 cuttedTrainData <- cutData(trainData)
-#print(cuttedData)
-#print(length(cuttedData))
-#print(cuttedData[1:150])
-
-
-
-
-
 
 ```
 
 
 ```{r}
-kmeans_14 = kmeans(cuttedData,centers = 14)
-#print(kmeans_14)
-
-cuttedTestData <- cutData(testData)
-print(typeof(cuttedTestData[1,1]))
-print(cuttedTestData)
+kmeans_14 = kmeans(cuttedTrainData,centers = 14)
+print(kmeans_14$cluster)
 #print(dim(kmeans_40$centers))
 #fitted(kmeans_40,method=c("centers", "classes"))
+```
+
+```{r}
+head(cuttedTrainData)
+```
+
+```{r}
+
 ```
 
