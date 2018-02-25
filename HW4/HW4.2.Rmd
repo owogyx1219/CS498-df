@@ -67,7 +67,7 @@ for(i in 1:length(trainData))
 }
 
 cuttedData <- matrix(cuttedData, ncol = 150, byrow = TRUE)
-print(cuttedData)
+#print(cuttedData)
 #print(length(cuttedData))
 #print(cuttedData[1:150])
 
@@ -76,5 +76,12 @@ print(cuttedData)
 
 
 
+```
+
+
+```{r}
+kmeans_40 = kmeans(cuttedData,centers = 40)
+print(dim(kmeans_40$centers))
+#fitted(kmeans_40,method=c("centers", "classes"))
 ```
 
