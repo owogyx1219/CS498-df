@@ -238,13 +238,13 @@ getLabels <- function(trainData, trainSize)
 ```
 
 ```{r}
-train_list <- vecQuantization(trainData, trainSize)
+train_hist <- vecQuantization(trainData, trainSize)
 train_labels <- getLabels(trainData, trainSize)
 
-temp <- as.vector(train_list[[1]])
-for(i in 2:length(train_list))
+temp <- as.vector(train_hist[[1]])
+for(i in 2:length(train_hist))
 {
-  temp <- c(temp, train_list[[i]])
+  temp <- c(temp, train_hist[[i]])
 }
 train_mat <- matrix(temp, ncol = 14, byrow = TRUE)
 print(head(train_mat))
@@ -254,12 +254,12 @@ print(head(train_mat_with_labels))
 
 
 
-test_list <- vecQuantization(testData, testSize)
+test_hist <- vecQuantization(testData, testSize)
 test_labels <- getLabels(testData, testSize)
-tempt <- as.vector(test_list[[1]])
-for(i in 2:length(test_list))
+tempt <- as.vector(test_hist[[1]])
+for(i in 2:length(test_hist))
 {
-  tempt <- c(tempt, test_list[[i]])
+  tempt <- c(tempt, test_hist[[i]])
 }
 test_mat <- matrix(tempt, ncol = 14, byrow = TRUE)
 print(head(test_mat))
@@ -267,12 +267,10 @@ print(head(test_mat))
 test_mat_with_labels <- cbind(test_mat, as.vector(test_labels))
 print(head(test_mat_with_labels))
 
+fit = randomForest(train_mat_with_labels$[,15] ~., data = train_mat_with_labels)
+prediction = predict(fit,test_mat_with_labels, predict.all = TRUE)
 
-#fit = randomForest(hist_list$V15 ~., data = hist_list)
-
-
-#prediction = predict(fit,data.frame(cuttedTestData), predict.all = TRUE)
-#predicted = prediction$aggregate
+predicted = prediction$aggregate
 #predicted = round(predicted,0)
 ```
 
