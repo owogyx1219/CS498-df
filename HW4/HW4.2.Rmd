@@ -116,7 +116,7 @@ set.seed(123)
 trainData <- sample(as.vector(class_list[[1]]), size = trainSize)
 testData <- setdiff(class_list[[1]], trainData)
 
-cutSize <- 50
+cutSize <- 32
 
 cutData <- function(trainData){
   cuttedData <- numeric()
@@ -125,10 +125,8 @@ cutData <- function(trainData){
     start <- 1
     end <- cutSize
     chunkSize <- floor( nrow(trainData[[i]]) / cutSize )
-    #print(chunkSize)
     dataPoint <- trainData[[i]]
-    trainLabels[[i]] <- dataPoint[1,4]
-    
+
     for(j in 1:chunkSize)
     {
       xyzData <- t(dataPoint[start:end,])
@@ -146,7 +144,6 @@ cutData <- function(trainData){
   return (cuttedData)
 }
 cuttedTrainDataWithLabels <- cutData(trainData)
-print(cuttedTrainDataWithLabels)
 cuttedTestDataWithLabels <- cutData(testData)
 
 trainDataLabels <- cuttedTrainDataWithLabels[, 151]
@@ -174,18 +171,16 @@ test_labels <- getDataLabels(testData)
 ```
 
 ```{r}
-print(dim(cuttedTrainData))
-print(dim(cuttedTestData))
 print(trainDataLabels)
-print(testDataLabels)
+print(train_labels)
 ```
 
 
 ```{r}
-kmeans_14 = kmeans(cuttedTrainData,centers = 14)
+cluster_nums <- 40
+kmeans_14 = kmeans(cuttedTrainData,centers = cluster_nums)
 cluster_vec <- kmeans_14$cluster
 cluster_centers <- kmeans_14$centers
-
 
 findNearestClusterIndex <- function(vec1, matrix1)
 {
@@ -223,7 +218,7 @@ vecQuantization <- function(trainData, trainSize)
   for(i in 1:length(cuttedDataPoints))
   {
     currDataPoint <- cuttedDataPoints[[i]]
-    hist_summary <- rep(0,14)
+    hist_summary <- rep(0,cluster_nums)
     for(j in 1:nrow(currDataPoint))
     {
       clusterCenterIndex <- findNearestClusterIndex(currDataPoint[j,], cluster_centers)
@@ -265,7 +260,7 @@ for(i in 2:length(train_hist))
 {
   temp <- c(temp, train_hist[[i]])
 }
-train_mat <- matrix(temp, ncol = 14, byrow = TRUE)
+train_mat <- matrix(temp, ncol = cluster_nums, byrow = TRUE)
 #print(head(train_mat))
 
 train_mat_with_labels <- cbind(train_mat,as.vector(train_labels))
@@ -281,7 +276,7 @@ for(i in 2:length(test_hist))
 {
   tempt <- c(tempt, test_hist[[i]])
 }
-test_mat <- matrix(tempt, ncol = 14, byrow = TRUE)
+test_mat <- matrix(tempt, ncol = cluster_nums, byrow = TRUE)
 #print(head(test_mat))
 
 test_mat_with_labels <- cbind(test_mat, as.vector(test_labels))
@@ -293,19 +288,19 @@ test_mat_with_labels <- cbind(test_mat, as.vector(test_labels))
 
 
 ```{r}
-train_mat_with_labels = data.frame(matrix(unlist(train_mat_with_labels),ncol = 15,byrow = FALSE))
+train_mat_with_labels = data.frame(matrix(unlist(train_mat_with_labels),ncol = cluster_nums+1,byrow = FALSE))
 print(head(train_mat_with_labels))
 ```
 
 ```{r}
-test_mat = data.frame(matrix(unlist(test_mat),ncol = 14,byrow = FALSE))
-fit = randomForest(train_mat_with_labels$X15 ~., data = train_mat_with_labels)
+test_mat = data.frame(matrix(unlist(test_mat),ncol = cluster_nums,byrow = FALSE))
+fit = randomForest(train_mat_with_labels$X41 ~., data = train_mat_with_labels)
 prediction = predict(fit,test_mat, predict.all = TRUE)
 
 predicted = prediction$aggregate
-print(round(predicted,0))
-print(test_labels)
-matrix_value = confusionMatrix(table(factor(round(predicted,0),levels=1:14),factor(test_labels,levels=1:14)))
+#print(round(predicted,0))
+#print(test_labels)
+matrix_value = confusionMatrix(table(factor(round(predicted,0),levels=1:cluster_nums),factor(test_labels,levels=1:cluster_nums)))
 matrix_value
 ```
 
