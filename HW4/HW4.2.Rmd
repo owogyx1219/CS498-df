@@ -4,6 +4,7 @@ output: word_document
 ---
 ```{r}
 library(randomForest)
+library(caret)
 ```
 
 ```{r}
@@ -230,6 +231,7 @@ cuttedTestData <- cutData(testData)
 ```{r}
 centers_14 = kmeans_14$centers
 new_centers_14 = data.frame(centers_14)
+new_centers_14
 ```
 
 ```{r}
@@ -239,11 +241,49 @@ for(i in 1:nrow(new_centers_14)){
   #print(center_label[[i]])
   new_centers_14[i,151]= center_label[[i]]
 }
+new_centers_14
 ```
 
 
 ```{r}
 set.seed(123)
-randomForest()
+fit = randomForest(new_centers_14$V151 ~., data = new_centers_14)
+prediction = predict(fit,data.frame(cuttedTestData), predict.all = TRUE)
+predicted = prediction$aggregate
+predicted = round(predicted,0)
+
+```
+
+```{r}
+map_list = rep(0,14)
+for(i in 1:14){
+  current_summary = get(paste("activity",i,"_summary",sep=""))
+  max_index <- 1
+  for(j in 1:length(current_summary)){
+    if(current_summary[j] > current_summary[max_index]){
+      max_index = j
+    }
+  }
+  map_list[i] = max_index
+}
+
+```
+
+```{r}
+mapped_labels = numeric()
+print(length(testDataLabels))
+for(i in 1:length(testDataLabels)){
+  currActivity <- testDataLabels[i]
+  mappedClusterCenter <- map_list[currActivity] 
+  mapped_labels <- c(mapped_labels, mappedClusterCenter)
+}
+testDataLabels
+mapped_labels
+```
+
+```{r}
+length(predicted)
+length(mapped_labels)
+confusionMatrix(table(factor(predicted,levels=1:14),factor(mapped_labels,levels=1:14)))
 ```
 
