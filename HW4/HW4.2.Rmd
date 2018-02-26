@@ -268,7 +268,7 @@ for(i in 2:length(train_hist))
 train_mat <- matrix(temp, ncol = 14, byrow = TRUE)
 #print(head(train_mat))
 
-train_mat_with_labels <- cbind(train_mat,as.vector(trainDataLabels))
+train_mat_with_labels <- cbind(train_mat,as.vector(train_labels))
 #print(head(train_mat_with_labels))
 
 
@@ -284,7 +284,7 @@ for(i in 2:length(test_hist))
 test_mat <- matrix(tempt, ncol = 14, byrow = TRUE)
 #print(head(test_mat))
 
-test_mat_with_labels <- cbind(test_mat, as.vector(testDataLabels))
+test_mat_with_labels <- cbind(test_mat, as.vector(test_labels))
 #print(head(train_mat_with_labels))
 
 #predicted = round(predicted,0)
@@ -303,9 +303,9 @@ fit = randomForest(train_mat_with_labels$X15 ~., data = train_mat_with_labels)
 prediction = predict(fit,test_mat, predict.all = TRUE)
 
 predicted = prediction$aggregate
-print(length(predicted))
-print(length(testDataLabels))
-matrix_value = confusionMatrix(table(factor(predicted,levels=1:14),factor(testDataLabels,levels=1:14)))
+print(round(predicted,0))
+print(test_labels)
+matrix_value = confusionMatrix(table(factor(round(predicted,0),levels=1:14),factor(test_labels,levels=1:14)))
 matrix_value
 ```
 
