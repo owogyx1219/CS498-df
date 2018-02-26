@@ -111,6 +111,7 @@ head(nrow(brush_teeth[[1]]))
 class_list <- list(c(brush_teeth,climb_stairs,comb_hair,descend_stairs,drink_glass,eat_meat,eat_soup,getup_bed,liedown_bed,pour_water,sitdown_chair,standup_chair,use_telephone,walk))
 
 trainSize <- floor(0.8*length(class_list[[1]]))
+testSize <- length(class_list[[1]]) - trainSize
 set.seed(123)
 trainData <- sample(as.vector(class_list[[1]]), size = trainSize)
 testData <- setdiff(class_list[[1]], trainData)
@@ -188,7 +189,6 @@ vecQuantization <- function(trainData, trainSize)
 {
   cuttedDataPoints <- list()
   cuttedDataPointsWithLabels <- list()
-  labels <- list()
   for(index in 1:trainSize)
   {
     dataPoint <- list()
@@ -199,11 +199,7 @@ vecQuantization <- function(trainData, trainSize)
     
     cuttedOneTrainData <- cuttedOneTrainDataWithLabels[,1:150]
     cuttedDataPoints[[index]] <- cuttedOneTrainData
-    
-    currLabel <- cuttedOneTrainDataWithLabels[,151]
-    labels <- c(labels, currLabel)
   }
-  
   
   hist_list <- list()
   for(i in 1:length(cuttedDataPoints))
@@ -213,32 +209,64 @@ vecQuantization <- function(trainData, trainSize)
     for(j in 1:nrow(currDataPoint))
     {
       clusterCenterIndex <- findNearestClusterIndex(currDataPoint[j,], cluster_centers)
-      #print(clusterCenterIndex)
       hist_summary[clusterCenterIndex] <- hist_summary[clusterCenterIndex] + 1
     }
     hist_list[[i]] <- hist_summary
-    #print(hist_summary)
   }
-  #print(hist_list)
-  return (list(hist_list, labels))
+  return (hist_list)
 }
 
-#print(typeof(cluster_vec))
-#print(length(cluster_vec))
-#print(cluster_vec[1])
+getLabels <- function(trainData, trainSize)
+{
+  labels <- list()
+  
+  for(index in 1:trainSize)
+  {
+    dataPoint <- list()
+    dataPoint[[1]] <- trainData[[index]]
+    
+    cuttedOneTrainDataWithLabels <- cutData(dataPoint)
+    
+    currLabel <- cuttedOneTrainDataWithLabels[,151]
+    labels <- c(labels, currLabel)
+  }
+  
+  return (labels)
+}
 
 
 ```
 
 ```{r}
-retResults <- vecQuantization(trainData, trainSize)
-train_hist <- retResults[[1]]
-train_labels <- retResults[[2]]
-print(typeof(train_hist))
-print(head(train_labels))
-train_hist <- cbind(data.frame(train_hist),train_labels)
-print(head(train_hist))
-print(train_hist)
+train_list <- vecQuantization(trainData, trainSize)
+train_labels <- getLabels(trainData, trainSize)
+
+temp <- as.vector(train_list[[1]])
+for(i in 2:length(train_list))
+{
+  temp <- c(temp, train_list[[i]])
+}
+train_mat <- matrix(temp, ncol = 14, byrow = TRUE)
+print(head(train_mat))
+
+train_mat_with_labels <- cbind(train_mat,as.vector(train_labels))
+print(head(train_mat_with_labels))
+
+
+
+test_list <- vecQuantization(testData, testSize)
+test_labels <- getLabels(testData, testSize)
+tempt <- as.vector(test_list[[1]])
+for(i in 2:length(test_list))
+{
+  tempt <- c(tempt, test_list[[i]])
+}
+test_mat <- matrix(tempt, ncol = 14, byrow = TRUE)
+print(head(test_mat))
+
+test_mat_with_labels <- cbind(test_mat, as.vector(test_labels))
+print(head(test_mat_with_labels))
+
 
 #fit = randomForest(hist_list$V15 ~., data = hist_list)
 
