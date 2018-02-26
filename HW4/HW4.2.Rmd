@@ -162,43 +162,58 @@ print(testDataLabels)
 
 ```{r}
 kmeans_14 = kmeans(cuttedTrainData,centers = 14)
-#print(kmeans_14$cluster)
 cluster_vec <- kmeans_14$cluster
 
 print(typeof(cluster_vec))
 print(length(cluster_vec))
 print(cluster_vec[1])
-activity_summary_1 <- rep(0, 14)
-activity_summary_2 <- rep(0, 14)
-activity_summary_3 <- rep(0, 14)
-activity_summary_4 <- rep(0, 14)
-activity_summary_5 <- rep(0, 14)
-activity_summary_6 <- rep(0, 14)
-activity_summary_7 <- rep(0, 14)
-activity_summary_8 <- rep(0, 14)
-activity_summary_9 <- rep(0, 14)
-activity_summary_10 <- rep(0, 14)
-activity_summary_11 <- rep(0, 14)
-activity_summary_12 <- rep(0, 14)
-activity_summary_13 <- rep(0, 14)
-activity_summary_14 <- rep(0, 14)
 
-for(index in 1:length(cluster_vec))
+getActivitySummary <- function(cvec, labels, activityIndex)
 {
-  activity_index <- trainDataLabels[index]
-  cluster_center_index <- cluster_vec[index]
-
-  activitySummary <- get(paste("activity_summary_",activity_index , sep = ""))
-  if(index <= 3)
+  activity_summary <- rep(0,14)
+  
+  for(index in 1:length(cvec))
   {
-    print(paste("activity_summary_",activity_index , sep = ""))
+    if(labels[index] == activityIndex)
+    {
+      cluster_center_index <- cvec[index]
+      activity_summary[cluster_center_index] <- activity_summary[cluster_center_index] + 1
+    }
   }
-  activitySummary[cluster_center_index] <- activitySummary[cluster_center_index] + 1
-  if(index <= 3)
-  {
-    print(activitySummary)
-  }
+  return (activity_summary)
 }
+
+activity1_summary <- getActivitySummary(cluster_vec, trainDataLabels, 1)
+activity2_summary <- getActivitySummary(cluster_vec, trainDataLabels, 2)
+activity3_summary <- getActivitySummary(cluster_vec, trainDataLabels, 3)
+activity4_summary <- getActivitySummary(cluster_vec, trainDataLabels, 4)
+activity5_summary <- getActivitySummary(cluster_vec, trainDataLabels, 5)
+activity6_summary <- getActivitySummary(cluster_vec, trainDataLabels, 6)
+activity7_summary <- getActivitySummary(cluster_vec, trainDataLabels, 7)
+activity8_summary <- getActivitySummary(cluster_vec, trainDataLabels, 8)
+activity9_summary <- getActivitySummary(cluster_vec, trainDataLabels, 9)
+activity10_summary <- getActivitySummary(cluster_vec, trainDataLabels, 10)
+activity11_summary <- getActivitySummary(cluster_vec, trainDataLabels, 11)
+activity12_summary <- getActivitySummary(cluster_vec, trainDataLabels, 12)
+activity13_summary <- getActivitySummary(cluster_vec, trainDataLabels, 13)
+activity14_summary <- getActivitySummary(cluster_vec, trainDataLabels, 14)
+
+print(activity1_summary)
+print(activity2_summary)
+print(activity3_summary)
+print(activity4_summary)
+print(activity5_summary)
+print(activity6_summary)
+print(activity7_summary)
+print(activity8_summary)
+print(activity9_summary)
+print(activity10_summary)
+print(activity11_summary)
+print(activity12_summary)
+print(activity13_summary)
+print(activity14_summary)
+
+
 #print(activity_summary_1)
 #print(activity_summary_6)
 
