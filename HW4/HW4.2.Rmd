@@ -116,7 +116,7 @@ set.seed(123)
 trainData <- sample(as.vector(class_list[[1]]), size = trainSize)
 testData <- setdiff(class_list[[1]], trainData)
 
-cutSize <- 32
+cutSize <- 60
 
 cutData <- function(trainData){
   cuttedData <- numeric()
@@ -140,17 +140,17 @@ cutData <- function(trainData){
       end <- end + cutSize
     }
   }
-  cuttedData <- matrix(cuttedData, ncol = 151, byrow = TRUE)
+  cuttedData <- matrix(cuttedData, ncol = 3*cutSize + 1, byrow = TRUE)
   return (cuttedData)
 }
 cuttedTrainDataWithLabels <- cutData(trainData)
 cuttedTestDataWithLabels <- cutData(testData)
 
-trainDataLabels <- cuttedTrainDataWithLabels[, 151]
-testDataLabels <- cuttedTestDataWithLabels[, 151]
+trainDataLabels <- cuttedTrainDataWithLabels[, 3*cutSize + 1]
+testDataLabels <- cuttedTestDataWithLabels[, 3*cutSize + 1]
 
-cuttedTrainData <- cuttedTrainDataWithLabels[, 1:150]
-cuttedTestData <- cuttedTestDataWithLabels[, 1:150]
+cuttedTrainData <- cuttedTrainDataWithLabels[, 1:3*cutSize]
+cuttedTestData <- cuttedTestDataWithLabels[, 1:3*cutSize]
 
 
 ```
@@ -210,7 +210,7 @@ vecQuantization <- function(trainData, trainSize)
     cuttedOneTrainDataWithLabels <- cutData(dataPoint)
     cuttedDataPointsWithLabels[[index]] <- cuttedOneTrainDataWithLabels
     
-    cuttedOneTrainData <- cuttedOneTrainDataWithLabels[,1:150]
+    cuttedOneTrainData <- cuttedOneTrainDataWithLabels[,1:3*cutSize]
     cuttedDataPoints[[index]] <- cuttedOneTrainData
   }
   
@@ -240,7 +240,7 @@ getLabels <- function(trainData, trainSize)
     
     cuttedOneTrainDataWithLabels <- cutData(dataPoint)
     
-    currLabel <- cuttedOneTrainDataWithLabels[,151]
+    currLabel <- cuttedOneTrainDataWithLabels[,3*cutSize + 1]
     labels <- c(labels, currLabel)
   }
   
