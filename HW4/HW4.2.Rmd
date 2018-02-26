@@ -117,6 +117,7 @@ trainData <- sample(as.vector(class_list[[1]]), size = trainSize)
 testData <- setdiff(class_list[[1]], trainData)
 
 cutSize <- 50
+
 cutData <- function(trainData){
   cuttedData <- numeric()
   for(i in 1:length(trainData))
@@ -126,6 +127,7 @@ cutData <- function(trainData){
     chunkSize <- floor( nrow(trainData[[i]]) / cutSize )
     #print(chunkSize)
     dataPoint <- trainData[[i]]
+    trainLabels[[i]] <- dataPoint[1,4]
     
     for(j in 1:chunkSize)
     {
@@ -153,6 +155,22 @@ testDataLabels <- cuttedTestDataWithLabels[, 151]
 cuttedTrainData <- cuttedTrainDataWithLabels[, 1:150]
 cuttedTestData <- cuttedTestDataWithLabels[, 1:150]
 
+
+```
+```{r}
+getDataLabels <- function(trainData)
+{
+  trainLabels <- list()
+  for(i in 1:length(trainData))
+  {
+    dataPoint <- trainData[[i]]
+    trainLabels[[i]] <- dataPoint[1,4]
+  }
+  return (trainLabels)
+}
+
+train_labels <- getDataLabels(trainData)
+test_labels <- getDataLabels(testData)
 ```
 
 ```{r}
@@ -239,7 +257,8 @@ getLabels <- function(trainData, trainSize)
 
 ```{r}
 train_hist <- vecQuantization(trainData, trainSize)
-train_labels <- getLabels(trainData, trainSize)
+#print(length(train_hist))
+#print(length(train_labels))
 
 temp <- as.vector(train_hist[[1]])
 for(i in 2:length(train_hist))
@@ -247,31 +266,47 @@ for(i in 2:length(train_hist))
   temp <- c(temp, train_hist[[i]])
 }
 train_mat <- matrix(temp, ncol = 14, byrow = TRUE)
-print(head(train_mat))
+#print(head(train_mat))
 
-train_mat_with_labels <- cbind(train_mat,as.vector(train_labels))
-print(head(train_mat_with_labels))
+train_mat_with_labels <- cbind(train_mat,as.vector(trainDataLabels))
+#print(head(train_mat_with_labels))
 
 
 
 test_hist <- vecQuantization(testData, testSize)
-test_labels <- getLabels(testData, testSize)
+#print(length(test_hist))
+#print(length(test_labels))
 tempt <- as.vector(test_hist[[1]])
 for(i in 2:length(test_hist))
 {
   tempt <- c(tempt, test_hist[[i]])
 }
 test_mat <- matrix(tempt, ncol = 14, byrow = TRUE)
-print(head(test_mat))
+#print(head(test_mat))
 
-test_mat_with_labels <- cbind(test_mat, as.vector(test_labels))
-print(head(test_mat_with_labels))
+test_mat_with_labels <- cbind(test_mat, as.vector(testDataLabels))
+#print(head(train_mat_with_labels))
 
-fit = randomForest(train_mat_with_labels$[,15] ~., data = train_mat_with_labels)
-prediction = predict(fit,test_mat_with_labels, predict.all = TRUE)
+#predicted = round(predicted,0)
+```
+
+
+
+```{r}
+train_mat_with_labels = data.frame(matrix(unlist(train_mat_with_labels),ncol = 15,byrow = FALSE))
+print(head(train_mat_with_labels))
+```
+
+```{r}
+test_mat = data.frame(matrix(unlist(test_mat),ncol = 14,byrow = FALSE))
+fit = randomForest(train_mat_with_labels$X15 ~., data = train_mat_with_labels)
+prediction = predict(fit,test_mat, predict.all = TRUE)
 
 predicted = prediction$aggregate
-#predicted = round(predicted,0)
+print(length(predicted))
+print(length(testDataLabels))
+matrix_value = confusionMatrix(table(factor(predicted,levels=1:14),factor(testDataLabels,levels=1:14)))
+matrix_value
 ```
 
 
