@@ -164,11 +164,64 @@ print(testDataLabels)
 ```{r}
 kmeans_14 = kmeans(cuttedTrainData,centers = 14)
 cluster_vec <- kmeans_14$cluster
+cluster_centers <- kmeans_14$centers
 
-print(typeof(cluster_vec))
-print(length(cluster_vec))
-print(cluster_vec[1])
+#print(trainData[[2]])
+cuttedDataPoints <- list()
+cuttedDataPointsWithLabels <- list()
+for(index in 1:trainSize)
+{
+  dataPoint <- list()
+  dataPoint[[1]] <- trainData[[index]]
 
+  cuttedOneTrainDataWithLabels <- cutData(dataPoint)
+  cuttedDataPointsWithLabels[[index]] <- cuttedOneTrainDataWithLabels
+  
+  cuttedOneTrainData <- cuttedOneTrainDataWithLabels[,1:150]
+  cuttedDataPoints[[index]] <- cuttedOneTrainData
+}
+
+#print(cuttedDataPoints[[1]])
+#print(cluster_centers)
+
+
+findNearestClusterIndex <- function(vec1, matrix1)
+{
+  minIndex <- 1
+  minDistance <- norm(vec1-matrix1[1,], "2")
+  for(i in 2:nrow(matrix1))
+  {
+    currDistance <- norm(vec1-matrix1[i, ], "2")
+    if(currDistance < minDistance)
+    {
+      minIndex <- i
+      minDistance <- currDistance
+    }
+  }
+  return (minIndex)
+}
+
+for(i in 1:length(cuttedDataPoints))
+{
+  currDataPoint <- cuttedDataPoints[[i]]
+  hist_summary <- rep(0,14)
+  for(j in 1:nrow(currDataPoint))
+  {
+    clusterCenterIndex <- findNearestClusterIndex(currDataPoint[j,], cluster_centers)
+    #print(clusterCenterIndex)
+    hist_summary[clusterCenterIndex] <- hist_summary[clusterCenterIndex] + 1
+  }
+  print(hist_summary)
+}
+
+#print(typeof(cluster_vec))
+#print(length(cluster_vec))
+#print(cluster_vec[1])
+
+
+```
+
+```{r}
 getActivitySummary <- function(cvec, labels, activityIndex)
 {
   activity_summary <- rep(0,14)
@@ -220,9 +273,7 @@ print(activity14_summary)
 
 #print(dim(kmeans_40$centers))
 #fitted(kmeans_40,method=c("centers", "classes"))
-```
 
-```{r}
 cuttedTestData <- cutData(testData)
 #print(typeof(cuttedTestData[1,1]))
 #print(cuttedTestData)
