@@ -153,6 +153,7 @@ cuttedTrainData <- cuttedTrainDataWithLabels[, 1:150]
 cuttedTestData <- cuttedTestDataWithLabels[, 1:150]
 
 ```
+
 ```{r}
 print(dim(cuttedTrainData))
 print(dim(cuttedTestData))
@@ -165,24 +166,6 @@ print(testDataLabels)
 kmeans_14 = kmeans(cuttedTrainData,centers = 14)
 cluster_vec <- kmeans_14$cluster
 cluster_centers <- kmeans_14$centers
-
-#print(trainData[[2]])
-cuttedDataPoints <- list()
-cuttedDataPointsWithLabels <- list()
-for(index in 1:trainSize)
-{
-  dataPoint <- list()
-  dataPoint[[1]] <- trainData[[index]]
-
-  cuttedOneTrainDataWithLabels <- cutData(dataPoint)
-  cuttedDataPointsWithLabels[[index]] <- cuttedOneTrainDataWithLabels
-  
-  cuttedOneTrainData <- cuttedOneTrainDataWithLabels[,1:150]
-  cuttedDataPoints[[index]] <- cuttedOneTrainData
-}
-
-#print(cuttedDataPoints[[1]])
-#print(cluster_centers)
 
 
 findNearestClusterIndex <- function(vec1, matrix1)
@@ -201,17 +184,43 @@ findNearestClusterIndex <- function(vec1, matrix1)
   return (minIndex)
 }
 
-for(i in 1:length(cuttedDataPoints))
+vecQuantization <- function(trainData, trainSize)
 {
-  currDataPoint <- cuttedDataPoints[[i]]
-  hist_summary <- rep(0,14)
-  for(j in 1:nrow(currDataPoint))
+  cuttedDataPoints <- list()
+  cuttedDataPointsWithLabels <- list()
+  labels <- list()
+  for(index in 1:trainSize)
   {
-    clusterCenterIndex <- findNearestClusterIndex(currDataPoint[j,], cluster_centers)
-    #print(clusterCenterIndex)
-    hist_summary[clusterCenterIndex] <- hist_summary[clusterCenterIndex] + 1
+    dataPoint <- list()
+    dataPoint[[1]] <- trainData[[index]]
+  
+    cuttedOneTrainDataWithLabels <- cutData(dataPoint)
+    cuttedDataPointsWithLabels[[index]] <- cuttedOneTrainDataWithLabels
+    
+    cuttedOneTrainData <- cuttedOneTrainDataWithLabels[,1:150]
+    cuttedDataPoints[[index]] <- cuttedOneTrainData
+    
+    currLabel <- cuttedOneTrainDataWithLabels[,151]
+    labels <- c(labels, currLabel)
   }
-  print(hist_summary)
+  
+  
+  hist_list <- list()
+  for(i in 1:length(cuttedDataPoints))
+  {
+    currDataPoint <- cuttedDataPoints[[i]]
+    hist_summary <- rep(0,14)
+    for(j in 1:nrow(currDataPoint))
+    {
+      clusterCenterIndex <- findNearestClusterIndex(currDataPoint[j,], cluster_centers)
+      #print(clusterCenterIndex)
+      hist_summary[clusterCenterIndex] <- hist_summary[clusterCenterIndex] + 1
+    }
+    hist_list[[i]] <- hist_summary
+    #print(hist_summary)
+  }
+  #print(hist_list)
+  return (list(hist_list, labels))
 }
 
 #print(typeof(cluster_vec))
@@ -220,6 +229,25 @@ for(i in 1:length(cuttedDataPoints))
 
 
 ```
+
+```{r}
+retResults <- vecQuantization(trainData, trainSize)
+train_hist <- retResults[[1]]
+train_labels <- retResults[[2]]
+print(typeof(train_hist))
+print(head(train_labels))
+train_hist <- cbind(data.frame(train_hist),train_labels)
+print(head(train_hist))
+print(train_hist)
+
+#fit = randomForest(hist_list$V15 ~., data = hist_list)
+
+
+#prediction = predict(fit,data.frame(cuttedTestData), predict.all = TRUE)
+#predicted = prediction$aggregate
+#predicted = round(predicted,0)
+```
+
 
 ```{r}
 getActivitySummary <- function(cvec, labels, activityIndex)
