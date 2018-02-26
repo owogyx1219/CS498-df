@@ -132,41 +132,96 @@ cutData <- function(trainData){
       temp <- c(temp, xyzData[2,])
       temp <- c(temp, xyzData[3,])
       cuttedData <- c(cuttedData, temp)
+  
+      cuttedData <- c(cuttedData, xyzData[4,1])
       start <- start + cutSize
       end <- end + cutSize
     }
-    if(end > nrow(dataPoint))
-    {
-      end <- nrow(dataPoint)
-      start <- end - cutSize
-      
-      xyzData <- t(dataPoint[start:end,])
-      temp <- xyzData[1,]
-      temp <- c(temp, xyzData[2,])
-      temp <- c(temp, xyzData[3,])
-      cuttedData <- c(cuttedData, temp)
-    }
   }
-  cuttedData <- matrix(cuttedData, ncol = 150, byrow = TRUE)
+  cuttedData <- matrix(cuttedData, ncol = 151, byrow = TRUE)
   return (cuttedData)
 }
-cuttedTrainData <- cutData(trainData)
+cuttedTrainDataWithLabels <- cutData(trainData)
+print(cuttedTrainDataWithLabels)
+cuttedTestDataWithLabels <- cutData(testData)
 
+trainDataLabels <- cuttedTrainDataWithLabels[, 151]
+testDataLabels <- cuttedTestDataWithLabels[, 151]
+
+cuttedTrainData <- cuttedTrainDataWithLabels[, 1:150]
+cuttedTestData <- cuttedTestDataWithLabels[, 1:150]
+
+```
+```{r}
+print(dim(cuttedTrainData))
+print(dim(cuttedTestData))
+print(trainDataLabels)
+print(testDataLabels)
 ```
 
 
 ```{r}
 kmeans_14 = kmeans(cuttedTrainData,centers = 14)
-print(kmeans_14$cluster)
+#print(kmeans_14$cluster)
+cluster_vec <- kmeans_14$cluster
+
+print(typeof(cluster_vec))
+print(length(cluster_vec))
+print(cluster_vec[1])
+activity_summary_1 <- list(0,0,0,0,0,0,0,0,0,0,0,0,0,0)
+activity_summary_2 <- list(0,0,0,0,0,0,0,0,0,0,0,0,0,0)
+activity_summary_3 <- list(0,0,0,0,0,0,0,0,0,0,0,0,0,0)
+activity_summary_4 <- list(0,0,0,0,0,0,0,0,0,0,0,0,0,0)
+activity_summary_5 <- list(0,0,0,0,0,0,0,0,0,0,0,0,0,0)
+activity_summary_6 <- list(0,0,0,0,0,0,0,0,0,0,0,0,0,0)
+activity_summary_7 <- list(0,0,0,0,0,0,0,0,0,0,0,0,0,0)
+activity_summary_8 <- list(0,0,0,0,0,0,0,0,0,0,0,0,0,0)
+activity_summary_9 <- list(0,0,0,0,0,0,0,0,0,0,0,0,0,0)
+activity_summary_10 <- list(0,0,0,0,0,0,0,0,0,0,0,0,0,0)
+activity_summary_11 <- list(0,0,0,0,0,0,0,0,0,0,0,0,0,0)
+activity_summary_12 <- list(0,0,0,0,0,0,0,0,0,0,0,0,0,0)
+activity_summary_13 <- list(0,0,0,0,0,0,0,0,0,0,0,0,0,0)
+activity_summary_14 <- list(0,0,0,0,0,0,0,0,0,0,0,0,0,0)
+
+print(trainDataLabels)
+print(trainDataLabels[1])
+for(index in 1:length(cluster_vec))
+{
+  activity_index <- trainDataLabels[index]
+  cluster_center_index <- cluster_vec[index]
+  
+  activitySummary <- get(paste("activity_summary_",activity_index , sep = ""))
+  activitySummary[[cluster_center_index]] <- activitySummary[[cluster_center_index]] + 1
+}
+print(length(activity_summary_1))
+
 #print(dim(kmeans_40$centers))
 #fitted(kmeans_40,method=c("centers", "classes"))
 ```
 
 ```{r}
-head(cuttedTrainData)
+cuttedTestData <- cutData(testData)
+#print(typeof(cuttedTestData[1,1]))
+#print(cuttedTestData)
 ```
 
 ```{r}
+centers_14 = kmeans_14$centers
+new_centers_14 = data.frame(centers_14)
+```
 
+```{r}
+center_label = list(1,2,3,4,5,6,7,8,9,10,11,12,13,14)
+for(i in 1:nrow(new_centers_14)){
+  #print(new_centers_14[i,])
+  #print(center_label[[i]])
+  new_centers_14[i,151]= center_label[[i]]
+}
+```
+
+
+```{r}
+set.seed(123)
+randomForest()
 ```
 
