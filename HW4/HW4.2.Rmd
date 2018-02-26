@@ -247,10 +247,10 @@ for(i in 2:length(train_hist))
   temp <- c(temp, train_hist[[i]])
 }
 train_mat <- matrix(temp, ncol = 14, byrow = TRUE)
-print(head(train_mat))
+#print(head(train_mat))
 
 train_mat_with_labels <- cbind(train_mat,as.vector(train_labels))
-print(head(train_mat_with_labels))
+#print(head(train_mat_with_labels))
 
 
 
@@ -262,15 +262,20 @@ for(i in 2:length(test_hist))
   tempt <- c(tempt, test_hist[[i]])
 }
 test_mat <- matrix(tempt, ncol = 14, byrow = TRUE)
-print(head(test_mat))
+#print(head(test_mat))
 
 test_mat_with_labels <- cbind(test_mat, as.vector(test_labels))
-print(head(test_mat_with_labels))
+#print(head(test_mat_with_labels))
 
-fit = randomForest(train_mat_with_labels$[,15] ~., data = train_mat_with_labels)
-prediction = predict(fit,test_mat_with_labels, predict.all = TRUE)
+colnames(train_mat_with_labels) <- c("1thcol","2thcol", "3thcol", "4thcol", "5thcol", "6thcol", "7thcol", "8thcol", "9thcol", "10thcol", "11thcol", "12thcol", "13thcol", "14thcol", "label_name")
 
-predicted = prediction$aggregate
+#print(train_mat_with_labels)
+train_data_df <- data.frame(train_mat_with_labels)
+print(train_data_df)
+#fit = randomForest(train_mat_with_labels$label_name ~., data = train_mat_with_labels)
+#prediction = predict(fit,test_mat_with_labels, predict.all = TRUE)
+
+#predicted = prediction$aggregate
 #predicted = round(predicted,0)
 ```
 
