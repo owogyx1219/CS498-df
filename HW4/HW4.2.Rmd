@@ -168,32 +168,39 @@ cluster_vec <- kmeans_14$cluster
 print(typeof(cluster_vec))
 print(length(cluster_vec))
 print(cluster_vec[1])
-activity_summary_1 <- list(0,0,0,0,0,0,0,0,0,0,0,0,0,0)
-activity_summary_2 <- list(0,0,0,0,0,0,0,0,0,0,0,0,0,0)
-activity_summary_3 <- list(0,0,0,0,0,0,0,0,0,0,0,0,0,0)
-activity_summary_4 <- list(0,0,0,0,0,0,0,0,0,0,0,0,0,0)
-activity_summary_5 <- list(0,0,0,0,0,0,0,0,0,0,0,0,0,0)
-activity_summary_6 <- list(0,0,0,0,0,0,0,0,0,0,0,0,0,0)
-activity_summary_7 <- list(0,0,0,0,0,0,0,0,0,0,0,0,0,0)
-activity_summary_8 <- list(0,0,0,0,0,0,0,0,0,0,0,0,0,0)
-activity_summary_9 <- list(0,0,0,0,0,0,0,0,0,0,0,0,0,0)
-activity_summary_10 <- list(0,0,0,0,0,0,0,0,0,0,0,0,0,0)
-activity_summary_11 <- list(0,0,0,0,0,0,0,0,0,0,0,0,0,0)
-activity_summary_12 <- list(0,0,0,0,0,0,0,0,0,0,0,0,0,0)
-activity_summary_13 <- list(0,0,0,0,0,0,0,0,0,0,0,0,0,0)
-activity_summary_14 <- list(0,0,0,0,0,0,0,0,0,0,0,0,0,0)
+activity_summary_1 <- rep(0, 14)
+activity_summary_2 <- rep(0, 14)
+activity_summary_3 <- rep(0, 14)
+activity_summary_4 <- rep(0, 14)
+activity_summary_5 <- rep(0, 14)
+activity_summary_6 <- rep(0, 14)
+activity_summary_7 <- rep(0, 14)
+activity_summary_8 <- rep(0, 14)
+activity_summary_9 <- rep(0, 14)
+activity_summary_10 <- rep(0, 14)
+activity_summary_11 <- rep(0, 14)
+activity_summary_12 <- rep(0, 14)
+activity_summary_13 <- rep(0, 14)
+activity_summary_14 <- rep(0, 14)
 
-print(trainDataLabels)
-print(trainDataLabels[1])
 for(index in 1:length(cluster_vec))
 {
   activity_index <- trainDataLabels[index]
   cluster_center_index <- cluster_vec[index]
-  
+
   activitySummary <- get(paste("activity_summary_",activity_index , sep = ""))
-  activitySummary[[cluster_center_index]] <- activitySummary[[cluster_center_index]] + 1
+  if(index <= 3)
+  {
+    print(paste("activity_summary_",activity_index , sep = ""))
+  }
+  activitySummary[cluster_center_index] <- activitySummary[cluster_center_index] + 1
+  if(index <= 3)
+  {
+    print(activitySummary)
+  }
 }
-print(length(activity_summary_1))
+#print(activity_summary_1)
+#print(activity_summary_6)
 
 #print(dim(kmeans_40$centers))
 #fitted(kmeans_40,method=c("centers", "classes"))
