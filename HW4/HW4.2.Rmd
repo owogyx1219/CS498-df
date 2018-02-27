@@ -110,13 +110,13 @@ head(nrow(brush_teeth[[1]]))
 
 class_list <- list(c(brush_teeth,climb_stairs,comb_hair,descend_stairs,drink_glass,eat_meat,eat_soup,getup_bed,liedown_bed,pour_water,sitdown_chair,standup_chair,use_telephone,walk))
 
-trainSize <- floor(0.8*length(class_list[[1]]))
+trainSize <- floor(0.75*length(class_list[[1]]))
 testSize <- length(class_list[[1]]) - trainSize
 set.seed(123)
 trainData <- sample(as.vector(class_list[[1]]), size = trainSize)
 testData <- setdiff(class_list[[1]], trainData)
 
-cutSize <- 60
+cutSize <- 50
 
 cutData <- function(trainData){
   cuttedData <- numeric()
@@ -154,6 +154,7 @@ cuttedTestData <- cuttedTestDataWithLabels[, 1:3*cutSize]
 
 
 ```
+
 ```{r}
 getDataLabels <- function(trainData)
 {
@@ -224,6 +225,13 @@ vecQuantization <- function(trainData, trainSize)
       clusterCenterIndex <- findNearestClusterIndex(currDataPoint[j,], cluster_centers)
       hist_summary[clusterCenterIndex] <- hist_summary[clusterCenterIndex] + 1
     }
+    
+    count <- 0
+    for(j in 1:length(hist_summary))
+    {
+      count <- count + hist_summary[j]
+    }
+    hist_summary <- hist_summary / count
     hist_list[[i]] <- hist_summary
   }
   return (hist_list)
@@ -251,6 +259,8 @@ getLabels <- function(trainData, trainSize)
 ```
 
 ```{r}
+
+
 train_hist <- vecQuantization(trainData, trainSize)
 #print(length(train_hist))
 #print(length(train_labels))
@@ -298,8 +308,7 @@ fit = randomForest(train_mat_with_labels$X41 ~., data = train_mat_with_labels)
 prediction = predict(fit,test_mat, predict.all = TRUE)
 
 predicted = prediction$aggregate
-#print(round(predicted,0))
-#print(test_labels)
+
 matrix_value = confusionMatrix(table(factor(round(predicted,0),levels=1:cluster_nums),factor(test_labels,levels=1:cluster_nums)))
 matrix_value
 ```
