@@ -1,0 +1,434 @@
+---
+title: "HW4"
+output: word_document
+---
+```{r}
+library(randomForest)
+library(caret)
+```
+
+```{r}
+filelist_1 = list.files('HMP_Dataset/Brush_teeth/',pattern = '*.txt')
+filelist_2 = list.files('HMP_Dataset/Climb_stairs/',pattern = '*.txt')
+filelist_3 = list.files('HMP_Dataset/Comb_hair/',pattern = '*.txt')
+filelist_4 = list.files('HMP_Dataset/Descend_stairs/',pattern = '*.txt')
+filelist_5 = list.files('HMP_Dataset/Drink_glass/',pattern = '*.txt')
+filelist_6 = list.files('HMP_Dataset/Eat_meat/',pattern = '*.txt')
+filelist_7 = list.files('HMP_Dataset/Eat_soup/',pattern = '*.txt')
+filelist_8 = list.files('HMP_Dataset/Getup_bed/',pattern = '*.txt')
+filelist_9 = list.files('HMP_Dataset/Liedown_bed/',pattern = '*.txt')
+filelist_10 = list.files('HMP_Dataset/Pour_water/',pattern = '*.txt')
+filelist_11 = list.files('HMP_Dataset/Sitdown_chair/',pattern = '*.txt')
+filelist_12 = list.files('HMP_Dataset/Standup_chair/',pattern = '*.txt')
+filelist_13 = list.files('HMP_Dataset/Use_telephone/',pattern = '*.txt')
+filelist_14 = list.files('HMP_Dataset/Walk/',pattern = '*.txt')
+
+brush_teeth = lapply(paste('HMP_Dataset/Brush_teeth/',filelist_1,sep = '/'), function(x) read.table(x, header=FALSE))
+climb_stairs = lapply(paste('HMP_Dataset/Climb_stairs/',filelist_2,sep = '/'), function(x) read.table(x, header=FALSE))
+comb_hair = lapply(paste('HMP_Dataset/Comb_hair/',filelist_3,sep = '/'), function(x) read.table(x, header=FALSE)) 
+descend_stairs = lapply(paste('HMP_Dataset/Descend_stairs/',filelist_4,sep = '/'), function(x) read.table(x, header=FALSE)) 
+drink_glass = lapply(paste('HMP_Dataset/Drink_glass/',filelist_5,sep = '/'), function(x) read.table(x, header=FALSE)) 
+eat_meat = lapply(paste('HMP_Dataset/Eat_meat/',filelist_6,sep = '/'), function(x) read.table(x, header=FALSE)) 
+eat_soup = lapply(paste('HMP_Dataset/Eat_soup/',filelist_7,sep = '/'), function(x) read.table(x, header=FALSE)) 
+getup_bed = lapply(paste('HMP_Dataset/Getup_bed/',filelist_8,sep = '/'), function(x) read.table(x, header=FALSE)) 
+liedown_bed = lapply(paste('HMP_Dataset/Liedown_bed/',filelist_9,sep = '/'), function(x) read.table(x, header=FALSE)) 
+pour_water = lapply(paste('HMP_Dataset/Pour_water/',filelist_10,sep = '/'), function(x) read.table(x, header=FALSE)) 
+sitdown_chair = lapply(paste('HMP_Dataset/Sitdown_chair/',filelist_11,sep = '/'), function(x) read.table(x, header=FALSE)) 
+standup_chair = lapply(paste('HMP_Dataset/Standup_chair/',filelist_12,sep = '/'), function(x) read.table(x, header=FALSE)) 
+use_telephone = lapply(paste('HMP_Dataset/Use_telephone/',filelist_13,sep = '/'), function(x) read.table(x, header=FALSE)) 
+walk = lapply(paste('HMP_Dataset/Walk/',filelist_14,sep = '/'), function(x) read.table(x, header=FALSE)) 
+remove(filelist_1,filelist_2,filelist_3,filelist_4,filelist_5,filelist_6,filelist_7,filelist_8,filelist_9,filelist_10,filelist_11,filelist_12,filelist_13,filelist_14)
+```
+
+```{r}
+for(i in 1:length(brush_teeth)){
+  brush_teeth[[i]]$label = 1
+}
+
+for(i in 1:length(climb_stairs)){
+    climb_stairs[[i]]$label = 2
+}
+
+for(i in 1:length(comb_hair)){
+    comb_hair[[i]]$label = 3
+}
+
+for(i in 1:length(descend_stairs)){
+    descend_stairs[[i]]$label = 4
+}
+
+for(i in 1:length(drink_glass)){
+    drink_glass[[i]]$label = 5
+}
+
+for(i in 1:length(eat_meat)){
+    eat_meat[[i]]$label = 6
+}
+
+for(i in 1:length(eat_soup)){
+    eat_soup[[i]]$label = 7
+}
+
+for(i in 1:length(getup_bed)){
+    getup_bed[[i]]$label = 8
+}
+
+for(i in 1:length(liedown_bed)){
+    liedown_bed[[i]]$label = 9
+}
+
+for(i in 1:length(pour_water)){
+    pour_water[[i]]$label = 10
+}
+
+for(i in 1:length(sitdown_chair)){
+    sitdown_chair[[i]]$label = 11
+}
+
+for(i in 1:length(standup_chair)){
+    standup_chair[[i]]$label = 12
+}
+
+for(i in 1:length(use_telephone)){
+    use_telephone[[i]]$label = 13
+}
+
+for(i in 1:length(walk)){
+    walk[[i]]$label = 14
+}
+print(brush_teeth[[1]])
+print(walk[[1]])
+```
+
+```{r}
+head(nrow(brush_teeth[[1]]))
+```
+
+
+```{r}
+#allData <- list()
+
+class_list <- list(c(brush_teeth,climb_stairs,comb_hair,descend_stairs,drink_glass,eat_meat,eat_soup,getup_bed,liedown_bed,pour_water,sitdown_chair,standup_chair,use_telephone,walk))
+
+trainSize <- floor(0.8*length(class_list[[1]]))
+testSize <- length(class_list[[1]]) - trainSize
+set.seed(123)
+trainData <- sample(as.vector(class_list[[1]]), size = trainSize)
+testData <- setdiff(class_list[[1]], trainData)
+
+cutSize <- 50
+overlap <- 20
+
+cutData <- function(trainData){
+  cuttedData <- numeric()
+  for(i in 1:length(trainData))
+  {
+    start <- 1
+    end <- cutSize
+    #chunkSize <- floor( nrow(trainData[[i]]) / cutSize )
+    dataPoint <- trainData[[i]]
+
+    while(end < dim(dataPoint)[1])
+    {
+      xyzData <- t(dataPoint[start:end,])
+      temp <- xyzData[1,]
+      temp <- c(temp, xyzData[2,])
+      temp <- c(temp, xyzData[3,])
+      cuttedData <- c(cuttedData, temp)
+  
+      cuttedData <- c(cuttedData, xyzData[4,1])
+      start <- start + overlap
+      end <- end + overlap
+    }
+  }
+  cuttedData <- matrix(cuttedData, ncol = 151, byrow = TRUE)
+  return (cuttedData)
+}
+cuttedTrainDataWithLabels <- cutData(trainData)
+print(cuttedTrainDataWithLabels)
+cuttedTestDataWithLabels <- cutData(testData)
+
+trainDataLabels <- cuttedTrainDataWithLabels[, 151]
+testDataLabels <- cuttedTestDataWithLabels[, 151]
+
+cuttedTrainData <- cuttedTrainDataWithLabels[, 1:150]
+cuttedTestData <- cuttedTestDataWithLabels[, 1:150]
+
+```
+```{r}
+getDataLabels <- function(trainData)
+{
+  trainLabels <- list()
+  for(i in 1:length(trainData))
+  {
+    dataPoint <- trainData[[i]]
+    trainLabels[[i]] <- dataPoint[1,4]
+  }
+  return (trainLabels)
+}
+
+train_labels <- getDataLabels(trainData)
+test_labels <- getDataLabels(testData)
+```
+
+```{r}
+print(dim(cuttedTrainData))
+print(dim(cuttedTestData))
+print(trainDataLabels)
+print(testDataLabels)
+```
+
+
+```{r}
+kmeans_14 = hkmeans(cuttedTrainData, 14, hc.metric = "maximum", hc.method="ward.D2", iter.max = 20)
+cluster_vec <- kmeans_14$cluster
+cluster_centers <- kmeans_14$centers
+
+
+findNearestClusterIndex <- function(vec1, matrix1)
+{
+  minIndex <- 1
+  minDistance <- norm(vec1-matrix1[1,], "2")
+  for(i in 2:nrow(matrix1))
+  {
+    currDistance <- norm(vec1-matrix1[i, ], "2")
+    if(currDistance < minDistance)
+    {
+      minIndex <- i
+      minDistance <- currDistance
+    }
+  }
+  return (minIndex)
+}
+
+vecQuantization <- function(trainData, trainSize)
+{
+  cuttedDataPoints <- list()
+  cuttedDataPointsWithLabels <- list()
+  for(index in 1:trainSize)
+  {
+    dataPoint <- list()
+    dataPoint[[1]] <- trainData[[index]]
+  
+    cuttedOneTrainDataWithLabels <- cutData(dataPoint)
+    cuttedDataPointsWithLabels[[index]] <- cuttedOneTrainDataWithLabels
+    
+    cuttedOneTrainData <- cuttedOneTrainDataWithLabels[,1:150]
+    cuttedDataPoints[[index]] <- cuttedOneTrainData
+  }
+  
+  hist_list <- list()
+  for(i in 1:length(cuttedDataPoints))
+  {
+    currDataPoint <- cuttedDataPoints[[i]]
+    hist_summary <- rep(0,14)
+    for(j in 1:nrow(currDataPoint))
+    {
+      clusterCenterIndex <- findNearestClusterIndex(currDataPoint[j,], cluster_centers)
+      hist_summary[clusterCenterIndex] <- hist_summary[clusterCenterIndex] + 1
+    }
+    
+    count <- 0
+    for(j in 1:length(hist_summary))
+    {
+      count <- count + hist_summary[j]
+    }
+    hist_summary <- hist_summary / count
+    hist_list[[i]] <- hist_summary
+  }
+  return (hist_list)
+}
+
+getLabels <- function(trainData, trainSize)
+{
+  labels <- list()
+  
+  for(index in 1:trainSize)
+  {
+    dataPoint <- list()
+    dataPoint[[1]] <- trainData[[index]]
+    
+    cuttedOneTrainDataWithLabels <- cutData(dataPoint)
+    
+    currLabel <- cuttedOneTrainDataWithLabels[,151]
+    labels <- c(labels, currLabel)
+  }
+  
+  return (labels)
+}
+
+
+```
+
+```{r}
+train_hist <- vecQuantization(trainData, trainSize)
+#print(length(train_hist))
+#print(length(train_labels))
+
+temp <- as.vector(train_hist[[1]])
+for(i in 2:length(train_hist))
+{
+  temp <- c(temp, train_hist[[i]])
+}
+train_mat <- matrix(temp, ncol = 14, byrow = TRUE)
+#print(head(train_mat))
+
+train_mat_with_labels <- cbind(train_mat,as.vector(train_labels))
+#print(head(train_mat_with_labels))
+
+
+
+test_hist <- vecQuantization(testData, testSize)
+#print(length(test_hist))
+#print(length(test_labels))
+tempt <- as.vector(test_hist[[1]])
+for(i in 2:length(test_hist))
+{
+  tempt <- c(tempt, test_hist[[i]])
+}
+test_mat <- matrix(tempt, ncol = 14, byrow = TRUE)
+#print(head(test_mat))
+
+test_mat_with_labels <- cbind(test_mat, as.vector(test_labels))
+#print(head(train_mat_with_labels))
+
+#predicted = round(predicted,0)
+```
+
+
+
+```{r}
+train_mat_with_labels = data.frame(matrix(unlist(train_mat_with_labels),ncol = 15,byrow = FALSE))
+print(head(train_mat_with_labels))
+```
+
+```{r}
+test_mat = data.frame(matrix(unlist(test_mat),ncol = 14,byrow = FALSE))
+fit = randomForest(train_mat_with_labels$X15 ~., data = train_mat_with_labels)
+prediction = predict(fit,test_mat, predict.all = TRUE)
+
+predicted = prediction$aggregate
+print(round(predicted,0))
+#print(test_labels)
+matrix_value = confusionMatrix(table(factor(round(predicted,0),levels=1:14),factor(test_labels,levels=1:14)))
+matrix_value
+```
+
+
+```{r}
+getActivitySummary <- function(cvec, labels, activityIndex)
+{
+  activity_summary <- rep(0,14)
+  
+  for(index in 1:length(cvec))
+  {
+    if(labels[index] == activityIndex)
+    {
+      cluster_center_index <- cvec[index]
+      activity_summary[cluster_center_index] <- activity_summary[cluster_center_index] + 1
+    }
+  }
+  return (activity_summary)
+}
+
+activity1_summary <- getActivitySummary(cluster_vec, trainDataLabels, 1)
+activity2_summary <- getActivitySummary(cluster_vec, trainDataLabels, 2)
+activity3_summary <- getActivitySummary(cluster_vec, trainDataLabels, 3)
+activity4_summary <- getActivitySummary(cluster_vec, trainDataLabels, 4)
+activity5_summary <- getActivitySummary(cluster_vec, trainDataLabels, 5)
+activity6_summary <- getActivitySummary(cluster_vec, trainDataLabels, 6)
+activity7_summary <- getActivitySummary(cluster_vec, trainDataLabels, 7)
+activity8_summary <- getActivitySummary(cluster_vec, trainDataLabels, 8)
+activity9_summary <- getActivitySummary(cluster_vec, trainDataLabels, 9)
+activity10_summary <- getActivitySummary(cluster_vec, trainDataLabels, 10)
+activity11_summary <- getActivitySummary(cluster_vec, trainDataLabels, 11)
+activity12_summary <- getActivitySummary(cluster_vec, trainDataLabels, 12)
+activity13_summary <- getActivitySummary(cluster_vec, trainDataLabels, 13)
+activity14_summary <- getActivitySummary(cluster_vec, trainDataLabels, 14)
+
+print(activity1_summary)
+print(activity2_summary)
+print(activity3_summary)
+print(activity4_summary)
+print(activity5_summary)
+print(activity6_summary)
+print(activity7_summary)
+print(activity8_summary)
+print(activity9_summary)
+print(activity10_summary)
+print(activity11_summary)
+print(activity12_summary)
+print(activity13_summary)
+print(activity14_summary)
+
+
+#print(activity_summary_1)
+#print(activity_summary_6)
+
+#print(dim(kmeans_40$centers))
+#fitted(kmeans_40,method=c("centers", "classes"))
+
+cuttedTestData <- cutData(testData)
+#print(typeof(cuttedTestData[1,1]))
+#print(cuttedTestData)
+```
+
+```{r}
+centers_14 = kmeans_14$centers
+new_centers_14 = data.frame(centers_14)
+new_centers_14
+```
+
+```{r}
+center_label = list(1,2,3,4,5,6,7,8,9,10,11,12,13,14)
+for(i in 1:nrow(new_centers_14)){
+  #print(new_centers_14[i,])
+  #print(center_label[[i]])
+  new_centers_14[i,151]= center_label[[i]]
+}
+new_centers_14
+```
+
+
+```{r}
+set.seed(123)
+fit = randomForest(new_centers_14$V151 ~., data = new_centers_14)
+prediction = predict(fit,data.frame(cuttedTestData), predict.all = TRUE)
+predicted = prediction$aggregate
+predicted = round(predicted,0)
+
+```
+
+```{r}
+map_list = rep(0,14)
+for(i in 1:14){
+  current_summary = get(paste("activity",i,"_summary",sep=""))
+  max_index <- 1
+  for(j in 1:length(current_summary)){
+    if(current_summary[j] > current_summary[max_index]){
+      max_index = j
+    }
+  }
+  map_list[i] = max_index
+}
+
+```
+
+```{r}
+mapped_labels = numeric()
+print(length(testDataLabels))
+for(i in 1:length(testDataLabels)){
+  currActivity <- testDataLabels[i]
+  mappedClusterCenter <- map_list[currActivity] 
+  mapped_labels <- c(mapped_labels, mappedClusterCenter)
+}
+testDataLabels
+mapped_labels
+```
+
+```{r}
+length(predicted)
+length(mapped_labels)
+confusionMatrix(table(factor(predicted,levels=1:14),factor(mapped_labels,levels=1:14)))
+```
+
