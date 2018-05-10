@@ -1,0 +1,244 @@
+---
+title: "HW6Part1M"
+output: word_document
+---
+
+```{r}
+music_data = read.csv(file = 'Geographical Original of Music/default_plus_chromatic_features_1059_tracks.txt',header = FALSE)
+```
+
+1.
+```{r}
+# linear regression of latitude against features
+raw_latitude_data = music_data[,1:117]
+lm.latitude = lm(V117 ~ ., data = raw_latitude_data)
+summary(lm.latitude)$r.squared
+```
+
+```{r}
+plot(fitted(lm.latitude), residuals(lm.latitude), pch = 16, cex = 1.3, col = "blue", main = "Residuals vs Fitted Values", xlab = "Fitted Values", ylab = "Residuals")
+```
+
+```{r}
+# linear regression of longitude against features
+raw_longitude_data = music_data[,-117]
+lm.longitude = lm(V118 ~ ., data = raw_longitude_data)
+summary(lm.longitude)$r.squared
+```
+
+```{r}
+plot(fitted(lm.longitude), residuals(lm.longitude), pch = 16, cex = 1.3, col = "blue", main = "Residuals vs Fitted Values ", xlab = "Fitted Values", ylab = "Residuals")
+```
+
+2.
+```{r}
+max(music_data$V117)
+min(music_data$V117)
+max(music_data$V118)
+min(music_data$V118)
+```
+
+```{r}
+# deal with the negative values in dependent variabes
+new_latitude_data = raw_latitude_data
+new_longitude_data = raw_longitude_data
+new_latitude_data$V117 = new_latitude_data$V117 + 90
+new_longitude_data$V118 = new_longitude_data$V118 + 180
+```
+
+```{r}
+library(MASS)
+# Box-Cox transform to transform regression on latitude
+bc_latitude_lm = lm(V117 ~ ., data = new_latitude_data)
+summary(bc_latitude_lm)$r.squared
+bc_latitude = boxcox(bc_latitude_lm)
+latitude_lambda = bc_latitude$x[which.max(bc_latitude$y)]
+plot(fitted(bc_latitude_lm), residuals(bc_latitude_lm), pch = 16, cex = 1.3, col = "blue", main = "Residuals vs Fitted Values ", xlab = "Fitted Values", ylab = "Residuals")
+```
+
+
+```{r}
+# improve the regression with latitude_lambda
+trans_latitude_data = new_latitude_data
+trans_latitude_data$V117 = trans_latitude_data$V117 ^ latitude_lambda
+trans_latitude_lm = lm(V117 ~ ., data = trans_latitude_data)
+summary(trans_latitude_lm)$r.squared
+plot(fitted(trans_latitude_lm), residuals(trans_latitude_lm), pch = 16, cex = 1.3, col = "blue", main = "Residuals vs Fitted Values ", xlab = "Fitted Values", ylab = "Residuals")
+```
+
+```{r}
+# plot the residuals vs fitted values in same scale
+trans_latitude_fitted = predict(trans_latitude_lm, trans_latitude_data[,-117])
+new_trans_latitude_fitted = trans_latitude_fitted ^ (1/latitude_lambda)
+trans_latitude_residuals = new_latitude_data[,117]- new_trans_latitude_fitted
+plot(new_trans_latitude_fitted,trans_latitude_residuals, main = "Residual Against the Fitted Values", cex = 1.3,pch = 16, col = "blue", xlab = "Fitted Values", ylab = " Residuals")
+```
+
+```{r}
+# compare the R-Squared values and MSE on latitude in same scale
+sm_bc_latitude = summary(bc_latitude_lm)
+mse_bc_latitude = mean(sm_bc_latitude$residuals^2)
+mse_bc_latitude
+mse_trans_latitude = mean(trans_latitude_residuals^2)
+mse_trans_latitude
+trans_latitude_r = 1 - (sum((trans_latitude_residuals)^2)/sum((new_latitude_data[,117]-mean(new_latitude_data[,117]))^2))
+summary(bc_latitude_lm)$r.squared
+trans_latitude_r
+```
+
+```{r}
+# Box-Cox transform to transform regression on longitude
+bc_longitude_lm = lm(V118 ~ ., data = new_longitude_data)
+summary(bc_longitude_lm)$r.squared
+bc_longitude = boxcox(bc_longitude_lm)
+longitude_lambda = bc_longitude$x[which.max(bc_longitude$y)]
+plot(fitted(bc_longitude_lm), residuals(bc_longitude_lm), pch = 16, cex = 1.3, col = "blue", main = "Residuals vs Fitted Values ", xlab = "Fitted Values", ylab = "Residuals")
+```
+
+```{r}
+# improve the regression with longitude_lambda
+trans_longitude_data = new_longitude_data
+trans_longitude_data$V118 = trans_longitude_data$V118 ^ longitude_lambda
+trans_longitude_lm = lm(V118 ~ ., data = trans_longitude_data)
+summary(trans_longitude_lm)$r.squared
+plot(fitted(trans_longitude_lm), residuals(trans_longitude_lm), pch = 16, cex = 1.3, col = "blue", main = "Residuals vs Fitted Values ", xlab = "Fitted Values", ylab = "Residuals")
+```
+
+```{r}
+# plot the residuals vs fitted values in same scale
+trans_longitude_fitted = predict(trans_longitude_lm, trans_longitude_data[,-117])
+new_trans_longitude_fitted = trans_longitude_fitted ^ (1/longitude_lambda)
+trans_longitude_residuals = new_longitude_data[,117]- new_trans_longitude_fitted
+plot(new_trans_longitude_fitted,trans_longitude_residuals, main = "Residual Against the Fitted Values", cex = 1.3,pch = 16, col = "blue", xlab = "Fitted Values", ylab = " Residuals")
+```
+
+```{r}
+# compare the R-Squared values and MSE on longitude in same scale
+sm_bc_longitude = summary(bc_longitude_lm)
+mse_bc_longitude = mean(sm_bc_longitude$residuals^2)
+mse_bc_longitude
+mse_trans_longitude = mean(trans_longitude_residuals^2)
+mse_trans_longitude
+trans_longitude_r = 1 - (sum((trans_longitude_residuals)^2)/sum((new_longitude_data[,117]-mean(new_longitude_data[,117]))^2))
+summary(bc_longitude_lm)$r.squared
+trans_longitude_r
+```
+
+3.
+```{r}
+library(DAAG)
+cv_latitude = cv.lm(raw_latitude_data,lm.latitude, m =10)
+cv_latitude$cvpred
+cv_latitude_re = raw_latitude_data[,117]- cv_latitude$cvpred
+mse_cv_latitude = mean(cv_latitude_re ^ 2)
+mse_cv_latitude
+```
+
+```{r}
+cv_longitude = cv.lm(raw_longitude_data,lm.longitude, m =10)
+cv_longitude$cvpred
+cv_longitude_re = raw_longitude_data[,117]- cv_longitude$cvpred
+mse_cv_longitude = mean(cv_longitude_re ^ 2)
+mse_cv_longitude
+```
+
+```{r}
+# Use glmnet to produce a ridge regression on latitude
+library(glmnet)
+latitude_ridge = cv.glmnet(as.matrix(raw_latitude_data[,1:116]),raw_latitude_data$V117,alpha = 0)
+cv_error_ridge = min(latitude_ridge$cvm)
+plot(latitude_ridge)
+title('Ridge Regression on Latitude vs Other Features')
+```
+
+```{r}
+# compare the MSE
+mse_cv_latitude
+cv_error_ridge
+latitude_ridge$lambda.min
+```
+
+```{r}
+# Use glmnet to produce a lasso regression on latitude
+latitude_lasso = cv.glmnet(as.matrix(raw_latitude_data[,1:116]),raw_latitude_data$V117,alpha = 1)
+cv_error_lasso = min(latitude_lasso$cvm)
+plot(latitude_lasso)
+title('Lasso Regression on Latitude vs Other Features')
+```
+
+```{r}
+# compare the MSE
+mse_cv_latitude
+cv_error_lasso
+latitude_lasso$lambda.min
+```
+
+```{r}
+# Use glmnet to produce a elastic net regression on latitude
+# Try three values of alpha, the weight setting how big L1 and L2 are
+latitude_en_1 = cv.glmnet(as.matrix(raw_latitude_data[,1:116]),raw_latitude_data$V117,alpha = 0.2)
+cv_error_en_1 = min(latitude_en_1$cvm)
+latitude_en_2 = cv.glmnet(as.matrix(raw_latitude_data[,1:116]),raw_latitude_data$V117,alpha = 0.5)
+cv_error_en_2 = min(latitude_en_2$cvm)
+latitude_en_3 = cv.glmnet(as.matrix(raw_latitude_data[,1:116]),raw_latitude_data$V117,alpha = 0.8)
+cv_error_en_3 = min(latitude_en_3$cvm)
+# find the min
+min_error = min(c(cv_error_en_1,cv_error_en_2,cv_error_en_3))
+min_error
+```
+
+```{r}
+latitude_en_3$lambda.min
+plot(latitude_en_3)
+title(' Elastic Net Regression on Latitude vs Other Features')
+```
+
+```{r}
+# Use glmnet to produce a ridge regression on longitude
+longitude_ridge = cv.glmnet(as.matrix(raw_longitude_data[,1:116]),raw_longitude_data$V118,alpha = 0)
+cv_error_ridge_l = min(longitude_ridge$cvm)
+plot(longitude_ridge)
+title('Ridge Regression on Longitude vs Other Features')
+```
+
+```{r}
+# compare the MSE
+mse_cv_longitude
+cv_error_ridge_l
+longitude_ridge$lambda.min
+```
+
+```{r}
+# Use glmnet to produce a lasso regression on longitude
+longitude_lasso = cv.glmnet(as.matrix(raw_longitude_data[,1:116]),raw_longitude_data$V118,alpha = 1)
+cv_error_lasso_l = min(longitude_lasso$cvm)
+plot(longitude_lasso)
+title('Ridge Regression on Longitude vs Other Features')
+```
+
+```{r}
+# compare the MSE
+mse_cv_longitude
+cv_error_lasso_l
+longitude_lasso$lambda.min
+```
+
+```{r}
+# Use glmnet to produce a elastic net regression on longitude
+# Try three values of alpha, the weight setting how big L1 and L2 are
+longitude_en_1 = cv.glmnet(as.matrix(raw_longitude_data[,1:116]),raw_longitude_data$V118,alpha = 0.2)
+cv_error_en_1_l = min(longitude_en_1$cvm)
+longitude_en_2 = cv.glmnet(as.matrix(raw_longitude_data[,1:116]),raw_longitude_data$V118,alpha = 0.5)
+cv_error_en_2_l = min(longitude_en_2$cvm)
+longitude_en_3 = cv.glmnet(as.matrix(raw_longitude_data[,1:116]),raw_longitude_data$V118,alpha = 0.8)
+cv_error_en_3_l = min(longitude_en_3$cvm)
+min_error_l = min(c(cv_error_en_1_l,cv_error_en_2_l,cv_error_en_3_l))
+min_error_l
+```
+
+```{r}
+longitude_en_2$lambda.min
+plot(longitude_en_2)
+title(' Elastic Net Regression on Longitude vs Other Features')
+```
+
